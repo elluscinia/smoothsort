@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
+"""
+Реализация алгоритма плавной сортировки
+"""
 import heapq
 import random
 import unittest
+import sys
+import time
 
 def numbersLeonardo(size):
     """
@@ -122,9 +127,6 @@ def smoothSort(listHeaps):
     return result
 
 class SmoothSortTestCase (unittest.TestCase):
-    """
-    Тест
-    """
     def runTest(self):
         """
         Тестирование правильности сортировки на 2000 случайных целых числах
@@ -133,9 +135,36 @@ class SmoothSortTestCase (unittest.TestCase):
         for i in xrange(0, 2000):
             data.append(random.randint(0,1000))
         listHeaps = doListHeaps(data)
-        self.assertEqual(smoothSort(listHeaps), sorted(data))
+        self.assertItemsEqual(smoothSort(listHeaps), sorted(data))
 
 if __name__ == '__main__':
-    unittest.main()
+    if len(sys.argv) == 1:
+        inputFile = open(sys.argv[1], 'r')
+    elif len(sys.argv) == 5:
+        try:     
+            inputFile = open(str(sys.argv[sys.argv.index('--input') + 1]), 'r')
+        except IOError as e:
+            print 'Файл для чтения не существует или не доступен'
+        except Exception as e:
+            print 'Неизвестная ошибка:'
+            print e
+        else:
+            outputFile = open(str(sys.argv[sys.argv.index('--output') + 1]), 'w')
+            inputData = inputFile.read()
+            inputFile.close()
+            data = [int(x) for x in inputData.split('\n') if x != '']
+            data = doListHeaps(data)
+            timeStart = time.time()
+            data = smoothSort(data)
+            timeEnd = time.time()
+            for x in data:
+                outputFile.write('%s\n' % x)
+            outputFile.close()
+            print 'Время работы алгоритма сортировки:', timeEnd - timeStart
+    else:
+        print 'Неверно введены параметры для запуска программы'
+        print '--input полный_путь_к_файлу_чтения --output полный_путь_к_файлу_записи'
+
 else:
     print 'import SmoothSort module'
+    print 'by el.luscinia'
