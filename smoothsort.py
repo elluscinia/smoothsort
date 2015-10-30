@@ -138,8 +138,22 @@ class SmoothSortTestCase (unittest.TestCase):
         self.assertItemsEqual(smoothSort(listHeaps), sorted(data))
 
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
+    if len(sys.argv) == 2:
         inputFile = open(sys.argv[1], 'r')
+        outputFile = open('smoothsort.txt', 'w')
+        print 'Файл для записи не был задан'
+        print 'Файл был создан в директории запуска программы: smoothsort.txt'
+        inputData = inputFile.read()
+        inputFile.close()
+        data = [int(x) for x in inputData.split('\n') if x != '']
+        data = doListHeaps(data)
+        timeStart = time.time()
+        data = smoothSort(data)
+        timeEnd = time.time()
+        for x in data:
+            outputFile.write('%s\n' % x)
+        outputFile.close()
+        print 'Время работы алгоритма сортировки:', timeEnd - timeStart
     elif len(sys.argv) == 5:
         try:     
             inputFile = open(str(sys.argv[sys.argv.index('--input') + 1]), 'r')
