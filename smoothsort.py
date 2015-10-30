@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-import random
 import heapq
+import random
+import unittest
 
 def numbersLeonardo(size):
     """
@@ -42,18 +43,27 @@ def doListHeaps(data):
     return listHeaps
 
 def heapDivision(heap):
+    """
+    Функция деления кучи на левые и правые подкучи
+    :param heap: куча для деления
+    :param return: возвращает кортеж из левой и правой подкучи соответсвенно
+    """
     heapleft = []
     heapright = []
     index = 0
-    indexesLeft = [1]
-    indexesRight = [2]
-    while indexesLeft[-1] < len(heap):
+    indexesLeft = [1] # список индексов для элементов левой подкучи
+    indexesRight = [2] # список индексов для элементов правой подкучи
+    while indexesLeft[-1] < len(heap): 
+        # исходя из логики построения куч, левая подкуча никогда не будет меньше правой
+
+        # считаем индексы для левой подкучи
         a = 2*indexesLeft[index] + 1
         b = 2*indexesLeft[index] + 2
 
         indexesLeft.append(a)
         indexesLeft.append(b)
 
+        # считаем индексы для правой подкучи
         c = 2*indexesRight[index] + 1
         d = 2*indexesRight[index] + 2
 
@@ -62,52 +72,70 @@ def heapDivision(heap):
 
         index += 1
 
+    # составляем списки левой и правой подкуч
     for i in indexesLeft:
         try: 
             heapleft.append(heap[i])
         except:
             # если обратились к элементу кучи, которого нет
-            # то и пофиг на него
+            # вообще так плохо делать. но я искренне раскиваюсь
             pass
     for i in indexesRight:
         try: 
             heapright.append(heap[i])
         except:
             # если обратились к элементу кучи, которого нет
-            # то и пофиг на него
+            # правда раскаиваюсь
             pass
+
     return heapleft, heapright
 
-# основной алгоритм
 def smoothSort(listHeaps):
+    """
+    Функция плавной сортировки
+    :param listHeaps: кучи
+    :param return: отсортированная последовательность данных
+    """
     result = []
-    while (massHeaps != []):
+    while (listHeaps != []):
+        # чтобы не писать пустые подкучи
         flag = 0
         # находим минимальный элемент среди корней куч
-        min_index = massHeaps.index(min(massHeaps))
+        min_index = listHeaps.index(min(listHeaps))
         # меняем его местами с корнем первой кучи
-        heapq.heapreplace(massHeaps[min_index], heapq.heapreplace(massHeaps[0], massHeaps[massHeaps.index(min(massHeaps))][0]))
+        heapq.heapreplace(listHeaps[min_index], heapq.heapreplace(listHeaps[0], listHeaps[listHeaps.index(min(listHeaps))][0]))
         # т.к. корень первой кучи будет в дальнейшем удален, размер кучи
         # уменьшится на 1 -> образуются две кучи из его левого и правого поддерева
-        if len(massHeaps[0]) > 1:
-            heapLeft, heapRight = heapDivision(massHeaps[0])
+        if len(listHeaps[0]) > 1:
+            heapLeft, heapRight = heapDivision(listHeaps[0])
             flag = 1
         # удаляем корень первой кучи - это минимальный элемент из всех возможных
-        minimum = heapq.heappop(massHeaps[0])
+        minimum = heapq.heappop(listHeaps[0])
         # ставим его в конечную последовательность чисел
         result.append(minimum)
         # удалим первый элемент списка и вставим его ранее полученные поддеревья
-        massHeaps.pop(0)
+        listHeaps.pop(0)
         # добавим две получившиеся кучи в начало всей последовательности куч
         if flag == 1:
-            massHeaps.insert(0, heapLeft)
-            massHeaps.insert(0, heapRight)
+            listHeaps.insert(0, heapLeft)
+            listHeaps.insert(0, heapRight)
     return result
+
+class SmoothSortTestCase (unittest.TestCase):
+    """
+    Тест
+    """
+    def runTest(self):
+        """
+        Тестирование правильности сортировки на 2000 случайных целых числах
+        """
+        data = []
+        for i in xrange(0, 2000):
+            data.append(random.randint(0,1000))
+        listHeaps = doListHeaps(data)
+        self.assertEqual(smoothSort(listHeaps), sorted(data))
+
 if __name__ == '__main__':
-    size = 200
-    # mass - входной массив данных
-    mass = [530, 15, 140, 801, 881, 166, 37, 174, 516, 87, 324, 484, 275, 939, 218, 107, 340, 105, 656, 992, 5, 960, 235, 686, 803, 215, 579, 554, 876, 779, 49, 28, 648, 437, 784, 774, 654, 552, 601, 64, 499, 624, 270, 301, 721, 853, 378, 121, 580, 288, 907, 527, 939, 285, 37, 474, 276, 507, 73, 8, 917, 677, 818, 724, 159, 827, 626, 229, 812, 549, 15, 895, 142, 798, 785, 22, 574, 127, 429, 212, 920, 925, 357, 272, 598, 569, 984, 191, 467, 664, 995, 131, 103, 856, 811, 895, 895, 333, 509, 157, 419, 387, 3, 507, 231, 381, 656, 114, 442, 11, 301, 878, 418, 286, 930, 547, 726, 489, 493, 13, 986, 883, 713, 50, 944, 762, 211, 375, 591, 883, 995, 592, 977, 185, 390, 985, 221, 700, 941, 727, 336, 202, 868, 116, 746, 165, 795, 442, 588, 910, 729, 457, 403, 774, 697, 86, 637, 521, 883, 462, 673, 934, 767, 932, 499, 856, 408, 285, 706, 942, 825, 799, 269, 731, 266, 194, 728, 924, 69, 61, 287, 76, 936, 91, 732, 766, 150, 837, 586, 654, 510, 630, 444, 300, 790, 177, 685, 26, 187, 235]
-    massHeaps = doListHeaps(mass)
-    print smoothSort(massHeaps)
+    unittest.main()
 else:
     print 'import SmoothSort module'
