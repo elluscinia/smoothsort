@@ -47,6 +47,32 @@ def doListHeaps(data):
     listHeaps.reverse()
     return listHeaps
 
+def countIndexes(i, indexes):
+    """
+    Функция формирует список элементов по заданным индексам
+    :param i: индекс, потомки которого ищутся
+    :param indexes: список индексов
+    :return indexes: список индексов
+    """
+    indexes.append(2*indexes[i]+1)
+    indexes.append(2*indexes[i]+2)
+
+    return indexes
+
+def getList(indexPart, heap):
+    """
+    Функция формирует подкучу из заданного списка индексов и исходной кучи
+    :param indexPart: список индексов 
+    :param heap: исходная куча
+    :return heapPart: найденная подкуча
+    """
+    heapPart = []
+    for i in indexPart:
+        if i < len(heap):
+            heapPart.append(heap[i])
+
+    return heapPart
+
 def heapDivision(heap):
     """
     Функция деления кучи на левые и правые подкучи
@@ -62,36 +88,16 @@ def heapDivision(heap):
         # исходя из логики построения куч, левая подкуча никогда не будет меньше правой
 
         # считаем индексы для левой подкучи
-        a = 2*indexesLeft[index] + 1
-        b = 2*indexesLeft[index] + 2
-
-        indexesLeft.append(a)
-        indexesLeft.append(b)
+        indexesLeft = countIndexes(index, indexesLeft)
 
         # считаем индексы для правой подкучи
-        c = 2*indexesRight[index] + 1
-        d = 2*indexesRight[index] + 2
-
-        indexesRight.append(c)
-        indexesRight.append(d)
+        indexesRight = countIndexes(index, indexesRight)
 
         index += 1
 
     # составляем списки левой и правой подкуч
-    for i in indexesLeft:
-        try: 
-            heapleft.append(heap[i])
-        except:
-            # если обратились к элементу кучи, которого нет
-            # вообще так плохо делать. но я искренне раскиваюсь
-            pass
-    for i in indexesRight:
-        try: 
-            heapright.append(heap[i])
-        except:
-            # если обратились к элементу кучи, которого нет
-            # правда раскаиваюсь
-            pass
+    heapleft = getList(indexesLeft, heap)
+    heapright = getList(indexesRight, heap)
 
     return heapleft, heapright
 
@@ -127,58 +133,57 @@ def smoothSort(listHeaps):
     return result
 
 class SmoothSortTestCase (unittest.TestCase):
-    def runTest(self):
+    def test_run(self):
         """
         Тестирование правильности сортировки на 2000 случайных целых числах
         """
         data = []
         for i in xrange(0, 2000):
-            data.append(random.randint(0,1000))
+            data.append(random.randint(500,1000))
         listHeaps = doListHeaps(data)
-        self.assertItemsEqual(smoothSort(listHeaps), sorted(data))
+        self.assertEqual(smoothSort(listHeaps), sorted(data))
 
-if __name__ == '__main__':
-    if len(sys.argv) == 2:
-        inputFile = open(sys.argv[1], 'r')
-        outputFile = open('smoothsort.txt', 'w')
-        print 'Файл для записи не был задан'
-        print 'Файл был создан в директории запуска программы: smoothsort.txt'
+def workFile(inputFileName, outputFileName):
+    """
+    Функция обработки аргументов командной строки
+    :param inputFileName: полный путь к файлу чтения
+    :param outputFileName: полный путь к файлу записи
+    :return None:
+    """
+    try:
+        inputFile = open(inputFileName, 'r')
+        if outputFileName == None:
+            outputFile = open('smoothsort.txt', 'w')
+            print 'Файл для записи не был задан'
+            print 'Файл был создан в директории запуска программы: smoothsort.txt'
+        else:
+            outputFile = open(outputFileName, 'w')
+    except IOError as e:
+        print 'Файл для чтения не существует или не доступен'
+    except Exception as e:
+        print 'Неизвестная ошибка:'
+        print e
+    else:
         inputData = inputFile.read()
         inputFile.close()
         data = [int(x) for x in inputData.split('\n') if x != '']
-        data = doListHeaps(data)
         timeStart = time.time()
-        data = smoothSort(data)
+        data = smoothSort(doListHeaps(data))
         timeEnd = time.time()
         for x in data:
             outputFile.write('%s\n' % x)
         outputFile.close()
         print 'Время работы алгоритма сортировки:', timeEnd - timeStart
+    return None
+
+if __name__ == '__main__':
+    if len(sys.argv) == 2:
+        workFile(str(sys.argv[1]), None)
     elif len(sys.argv) == 5:
-        try:     
-            inputFile = open(str(sys.argv[sys.argv.index('--input') + 1]), 'r')
-        except IOError as e:
-            print 'Файл для чтения не существует или не доступен'
-        except Exception as e:
-            print 'Неизвестная ошибка:'
-            print e
-        else:
-            outputFile = open(str(sys.argv[sys.argv.index('--output') + 1]), 'w')
-            inputData = inputFile.read()
-            inputFile.close()
-            data = [int(x) for x in inputData.split('\n') if x != '']
-            data = doListHeaps(data)
-            timeStart = time.time()
-            data = smoothSort(data)
-            timeEnd = time.time()
-            for x in data:
-                outputFile.write('%s\n' % x)
-            outputFile.close()
-            print 'Время работы алгоритма сортировки:', timeEnd - timeStart
+        workFile(str(sys.argv[sys.argv.index('--input') + 1]), str(sys.argv[sys.argv.index('--output') + 1]))
     else:
         print 'Неверно введены параметры для запуска программы'
         print '--input полный_путь_к_файлу_чтения --output полный_путь_к_файлу_записи'
-
 else:
     print 'import SmoothSort module'
     print 'by el.luscinia'
