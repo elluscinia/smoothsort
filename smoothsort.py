@@ -112,9 +112,14 @@ def smoothSort(listHeaps):
         # чтобы не писать пустые подкучи
         flag = 0
         # находим минимальный элемент среди корней куч
-        min_index = listHeaps.index(min(listHeaps))
+        min_index = listHeaps.index(min(listHeaps)) # индекс кучи с минимальным корнем
         # меняем его местами с корнем первой кучи
-        heapq.heapreplace(listHeaps[min_index], heapq.heapreplace(listHeaps[0], listHeaps[listHeaps.index(min(listHeaps))][0]))
+        # запомним корень текущей кучи
+        current_root = listHeaps[0][0]
+        # и минимальный элемент
+        current_min = listHeaps[min_index][0]
+        heapq.heapreplace(listHeaps[0], current_min)
+        heapq.heapreplace(listHeaps[min_index], current_root)
         # т.к. корень первой кучи будет в дальнейшем удален, размер кучи
         # уменьшится на 1 -> образуются две кучи из его левого и правого поддерева
         if len(listHeaps[0]) > 1:
