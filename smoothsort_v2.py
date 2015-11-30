@@ -3,6 +3,9 @@
 Алгоритм плавной сортировки за O(lgN)
 """
 import random
+import unittest
+import sys
+import time
 
 def numbersLeonardo(size):
     """
@@ -82,6 +85,30 @@ def createSmoothHeap(array, heapsSizes, indexesHeapsSizes, pos):
         sortRoots(array, heapsSizes, indexesHeapsSizes, pos)
     return array
 
+def destroySmoothHeap(array, heapsSizes, indexesHeapsSizes, pos):
+    """
+    Функция разрушает кучу, упорядочивая элементы в исходном массива с конца
+    :param array: куча из куч размерами чисел Леонардо
+    :param heapsSizes: список размеров куч
+    :param indexesHeapsSizes: список индексов размеров используемых куч
+    :param pos: последняя куча
+    :param return: упорядоченный массив чисел
+    """
+    for i in xrange(len(array)-2,0,-1): # выбираем элементы, начиная с предпоследнего, последний элемент 100% наибольший
+        if indexesHeapsSizes[pos] == 0: # куча размером 1
+            indexesHeapsSizes.pop() # просто удаляем её из общего списка вершин, тем самым исключая из дальнейшего рассмотрения
+            pos -= 1 
+        else:
+            indexesHeapsSizes[pos] -= 1 # уменьшаем размер кучи, L(x-1)
+            if indexesHeapsSizes[pos] == 0:
+                indexesHeapsSizes.append(0)
+            else:
+                # добавим кучу L(x-2)
+                indexesHeapsSizes.append(indexesHeapsSizes[pos]-1)
+            pos += 1 # т.к. разбили кучу на подкучи, увеличилось число куч
+        sortRoots(array, heapsSizes, indexesHeapsSizes, pos) # отсортируем после "удаления" новые корни
+    return array
+
 def siftDown(array, heapsSizes, indexesHeapsSizes, pos, node):
     """
     Функция просейки (восстановление свойств кучи)
@@ -122,12 +149,64 @@ def smoothsort(array):
     :param array: исходный массив чисел
     :param return: упорядоченный массив
     """
-    pos = 0 #индекс последнего элемента в списке индексов размеров используемых куч
+    pos = 0 # индекс последнего элемента в списке индексов размеров используемых куч
     heapsSizes = numbersLeonardo(len(array)) # находим размеры куч, которые будут использованны
     indexesHeapsSizes = [0] # для начала
     array = createSmoothHeap(array, heapsSizes, indexesHeapsSizes, pos) # создаем кучу из куч размерами чисел Леонардо
+    pos = len(indexesHeapsSizes)-1
+    array = destroySmoothHeap(array, heapsSizes, indexesHeapsSizes, pos) # создаем упорядоченный массив
     return array
 
+class SmoothSortTestCase (unittest.TestCase):
+    def test_run(self):
+        """
+        Тестирование правильности сортировки на 2000 случайных целых числах
+        """
+        data = []
+        for i in xrange(0, 2000):
+            data.append(random.randint(500,1000))
+        self.assertEqual(smoothsort(data), sorted(data))
+
+def argumentHandling(inputFileName, outputFileName):
+    """
+    Функция обработки аргументов командной строки
+    :param inputFileName: полный путь к файлу чтения
+    :param outputFileName: полный путь к файлу записи
+    :return None:
+    """
+    try:
+        inputFile = open(inputFileName, 'r')
+        if outputFileName == None:
+            outputFile = open('smoothsort.txt', 'w')
+            print 'Файл для записи не был задан'
+            print 'Файл был создан в директории запуска программы: smoothsort.txt'
+        else:
+            outputFile = open(outputFileName, 'w')
+    except IOError as e:
+        print 'Файл для чтения не существует или не доступен'
+    except Exception as e:
+        print 'Неизвестная ошибка:'
+        print e
+    else:
+        inputData = inputFile.read()
+        inputFile.close()
+        data = [int(x) for x in inputData.split('\n') if x != '']
+        timeStart = time.time()
+        data = smoothsort(data)
+        timeEnd = time.time()
+        for x in data:
+            outputFile.write('%s\n' % x)
+        outputFile.close()
+        print 'Время работы алгоритма сортировки:', timeEnd - timeStart
+    return None
+
 if __name__ == '__main__':
-    array = [85, 54, 107, 49, 46, 15, 37, 27, 48, 31, 101, 103, 13, 71, 78, 8, 106, 34, 35, 66, 41, 89, 18, 23, 29, 70, 72, 86, 39, 99, 20, 62, 17, 6, 25, 90, 12, 67, 82, 75, 94, 43, 9, 7, 3, 42, 50, 105, 98, 40, 65, 91, 26, 47, 102, 38, 11, 88, 64, 16, 87, 2, 55, 76, 57, 97, 74, 59, 60, 22, 104, 80, 73, 32, 5, 28, 51, 63, 19, 93, 92, 21, 68, 33, 58, 56, 53, 10, 79, 83, 61, 95, 24, 14, 84, 69, 44, 96, 36, 77, 45, 81, 52, 30, 1, 108, 100, 4]
-    a = smoothsort(array)
+    if len(sys.argv) == 2:
+        argumentHandling(str(sys.argv[1]), None)
+    elif len(sys.argv) == 5:
+        argumentHandling(str(sys.argv[sys.argv.index('--input') + 1]), str(sys.argv[sys.argv.index('--output') + 1]))
+    else:
+        print 'Неверно введены параметры для запуска программы'
+        print '--input полный_путь_к_файлу_чтения --output полный_путь_к_файлу_записи'
+else:
+    print 'import smoothsort module'
