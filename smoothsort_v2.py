@@ -45,10 +45,10 @@ def sortRoots(array, heapsSizes, indexesHeapsSizes, pos):
                     # для того, чтобы не делать просейку для корней, которые не были изменены
                     if j-1 < lastRoot:
                         lastRoot = j-1
-            else: # для остальных случаев необхожимо найти левого и правого ребёнка
+            else: # для остальных случаев необходимо найти левого и правого ребёнка
                 childRight = roots[j] - 1 # правый ребёнок всегда стоит рядом со своим родителем
                 if indexesHeapsSizes[j] > 1: # в случае, если куча размером больше 3
-                    childLeft = roots[j]-heapsSizes[indexesHeapsSizes[j]-2]-1 # мы навершняка знаем размеры детей левого ребёнка (по индексам), ищем с конца
+                    childLeft = roots[j]-heapsSizes[indexesHeapsSizes[j]-2]-1 # мы наверняка знаем размеры детей левого ребёнка (по индексам), ищем с конца
                 else:
                     childLeft = roots[j]-2 # для кучи из 3-х элементов
                 # если корень соседней (предыдущей) кучи больше правого и левого ребёнка, а также самого корня текущей кучи
@@ -76,7 +76,7 @@ def createSmoothHeap(array, heapsSizes, indexesHeapsSizes, pos):
     for i in xrange(1,len(array)): # выбираются элементы, начиная со второго
         if pos > 0 and (indexesHeapsSizes[pos-1] == indexesHeapsSizes[pos]+1 or indexesHeapsSizes[pos-1] == 0): # элемент становится новым корнем двух предыдущих куч
             indexesHeapsSizes.pop()
-            pos -= 1 # имеет значение индекса последнего элемента списка используемых размеров куч
+            pos -= 1 # образовалась новая куча из двух существующих, общее кол-во куч уменьшилось
             indexesHeapsSizes[pos] += 1 # увеличиваем размер последней кучи (объединение двух последних куч новым элементом)
         else: # добавляется новый элемент - куча размером 1
             indexesHeapsSizes.append(0)
