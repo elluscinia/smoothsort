@@ -111,7 +111,7 @@ def destroySmoothHeap(array, heapsSizes, indexesHeapsSizes, pos):
 
 def siftDown(array, heapsSizes, indexesHeapsSizes, pos, node):
     """
-    Функция просейки (восстановление свойств кучи)
+    Функция просеивания (восстановление свойств кучи)
     :param array: массив чисел
     :param heapsSizes: список размеров куч
     :param indexesHeapsSizes: список индексов размеров используемых куч
@@ -197,7 +197,7 @@ def argumentHandling(inputFileName, outputFileName):
         for x in data:
             outputFile.write('%s\n' % x)
         outputFile.close()
-        print 'Время работы алгоритма сортировки:', timeEnd - timeStart
+        print 'Время работы алгоритма сортировки:', timeEnd - timeStart, 'seconds'
     return None
 
 if __name__ == '__main__':
